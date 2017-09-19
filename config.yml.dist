@@ -1,0 +1,4 @@
+breezy:
+  pin: 2
+  max_tmp: 65
+  target_cool_tmp: 45

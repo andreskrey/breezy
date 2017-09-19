@@ -3,14 +3,17 @@
 import os
 import syslog
 from time import sleep
+import yaml
 import RPi.GPIO as GPIO
 
 pin = 2
-maxTMP = 65
-targetTMPWhenCooling = 45
+max_tmp = 65
+target_cool_tmp = 45
 
 
 def setup():
+    with open('config.yml', 'r') as stream:
+        data_loaded = yaml.load(stream)
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(pin, GPIO.OUT)
@@ -19,7 +22,7 @@ def setup():
 
 def hotflow(current_temp):
     syslog.syslog(syslog.LOG_NOTICE, "Breezy: Hotflow stated. Temp: {}".format(current_temp))
-    while current_temp > targetTMPWhenCooling:
+    while current_temp > target_cool_tmp:
         GPIO.output(pin, True)
         sleep(600)
         current_temp = gettemp()
@@ -40,7 +43,7 @@ try:
     setup()
     while True:
         CPU_temp = gettemp()
-        if CPU_temp > maxTMP:
+        if CPU_temp > max_tmp:
             hotflow(CPU_temp)
         else:
             coldflow()
