@@ -1,2 +1,2 @@
+PyYAML
 RPi.GPIO==0.6.3
-ruamel.yaml

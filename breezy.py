@@ -6,47 +6,49 @@ from time import sleep
 import yaml
 import RPi.GPIO as GPIO
 
-pin = 2
-max_tmp = 65
-target_cool_tmp = 45
 
+class Breezy:
+    pin = 2
+    max_tmp = 65
+    target_cool_tmp = 45
+    GPIO = None
 
-def setup():
-    with open('config.yml', 'r') as stream:
-        data_loaded = yaml.load(stream)
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(pin, GPIO.OUT)
-    return ()
+    def __init__(self):
+        with open('config.yml', 'r') as stream:
+            data_loaded = yaml.load(stream)
+            self.pin = data_loaded['breezy']['pin']
+            self.max_tmp = data_loaded['breezy']['max_tmp']
+            self.target_cool_tmp = data_loaded['breezy']['target_cool_tmp']
+        self.GPIO = __import__('RPi.GPIO')
+        self.GPIO.setwarnings(False)
+        self.GPIO.setmode(self.GPIO.BCM)
+        self.GPIO.setup(self.pin, self.GPIO.OUT)
 
+    def hotflow(self, current_temp):
+        syslog.syslog(syslog.LOG_NOTICE, "Breezy: Hotflow stated. Temp: {}".format(current_temp))
+        while current_temp > self.target_cool_tmp:
+            self.GPIO.output(self.pin, True)
+            sleep(600)
+            current_temp = self.get_temp()
+            syslog.syslog(syslog.LOG_NOTICE, "Breezy: Hotflow continuing. Temp: {}".format(current_temp))
 
-def hotflow(current_temp):
-    syslog.syslog(syslog.LOG_NOTICE, "Breezy: Hotflow stated. Temp: {}".format(current_temp))
-    while current_temp > target_cool_tmp:
-        GPIO.output(pin, True)
-        sleep(600)
-        current_temp = gettemp()
-        syslog.syslog(syslog.LOG_NOTICE, "Breezy: Hotflow continuing. Temp: {}".format(current_temp))
+    def coldflow(self):
+        sleep(60)
 
-
-def coldflow():
-    sleep(60)
-
-
-def gettemp():
-    res = os.popen('vcgencmd measure_temp').readline()
-    return float(res.replace("temp=", "").replace("'C\n", ""))
+    def get_temp(self):
+        res = os.popen('vcgencmd measure_temp').readline()
+        return float(res.replace("temp=", "").replace("'C\n", ""))
 
 
 try:
-    syslog.syslog(syslog.LOG_INFO, "Breezy: Starting. Temp: {}".format(gettemp()))
-    setup()
+    breezy = Breezy()
+    syslog.syslog(syslog.LOG_INFO, "Breezy: Starting. Temp: {}".format(breezy.get_temp()))
     while True:
-        CPU_temp = gettemp()
-        if CPU_temp > max_tmp:
-            hotflow(CPU_temp)
+        CPU_temp = breezy.get_temp()
+        if CPU_temp > breezy.max_tmp:
+            breezy.hotflow(CPU_temp)
         else:
-            coldflow()
+            breezy.coldflow()
 
 except KeyboardInterrupt:
-    GPIO.output(pin, False)
+    GPIO.output(breezy.pin, False)
