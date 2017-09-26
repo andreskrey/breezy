@@ -16,6 +16,6 @@ You will need a 5v fan and a NPN Transistor. Basically you will want to connect 
 ### Software installation
 
 1) `> git clone`
-2) `> virtualenv breezy`
+2) `> pip3 install -r requirements.txt`
 3) Edit your `config.yml` using the reference `config.yml.dist` file.
 4) `>python3 breezy.py &`
