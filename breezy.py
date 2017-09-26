@@ -23,10 +23,10 @@ class Breezy:
         GPIO.setup(self.pin, GPIO.OUT)
 
     def hotflow(self, current_temp):
+        GPIO.output(self.pin, True)
         syslog.syslog(syslog.LOG_NOTICE, "[breezy] > Hotflow started. Temp: {}".format(current_temp))
         while current_temp > self.target_cool_tmp:
-            GPIO.output(self.pin, True)
-            sleep(10)
+            sleep(600)
             current_temp = self.get_temp()
 
             # Stop process if we reach target temp
