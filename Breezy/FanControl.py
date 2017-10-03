@@ -6,7 +6,8 @@ from time import sleep
 import yaml
 import RPi.GPIO as GPIO
 
-class Breezy:
+
+class FanControl:
     # Default values
     pin = 2
     max_tmp = 65
@@ -48,16 +49,3 @@ class Breezy:
         GPIO.output(self.pin, False)
 
 
-try:
-    breezy = Breezy()
-    syslog.syslog(syslog.LOG_INFO, "[breezy] > Starting. Temp: {}".format(breezy.get_temp()))
-    while True:
-        CPU_temp = breezy.get_temp()
-        if CPU_temp > breezy.max_tmp:
-            breezy.hotflow(CPU_temp)
-        else:
-            breezy.coldflow()
-
-except KeyboardInterrupt:
-    breezy = Breezy()
-    breezy.clean_up()
