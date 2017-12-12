@@ -2,10 +2,10 @@
 
 import syslog
 
-import Breezy
+import FanControl
 
 try:
-    breezy = Breezy.FanControl.FanControl()
+    breezy = FanControl.FanControl()
     syslog.syslog(syslog.LOG_INFO, "[breezy] > Starting. Temp: {}".format(breezy.get_temp()))
     while True:
         CPU_temp = breezy.get_temp()
@@ -15,5 +15,5 @@ try:
             breezy.coldflow()
 
 except KeyboardInterrupt:
-    breezy = Breezy.FanControl.FanControl()
+    breezy = FanControl.FanControl()
     breezy.clean_up()
